@@ -3,37 +3,112 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YOLO Training Metrics</title>
+    <title>YOLO Training Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        canvas { max-width: 600px; margin: 20px 0; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #1e1e2f;
+            color: #e0e0e0;
+        }
+        h1 {
+            text-align: center;
+            color: #00c4cc;
+            margin-bottom: 20px;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+        }
+        .dashboard {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+        }
+        .chart-card {
+            background-color: #2a2a3d;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            transition: transform 0.2s;
+        }
+        .chart-card:hover {
+            transform: scale(1.02);
+        }
+        canvas {
+            width: 100% !important;
+            max-width: 500px; /* จำกัดความกว้างสูงสุด */
+            height: 250px !important; /* ลดความสูงเพื่อให้สมส่วน */
+            max-height: 300px; /* จำกัดความสูงสูงสุด */
+            background-color: #33334d;
+            border-radius: 5px;
+            padding: 5px;
+            margin: 0 auto; /* จัดกึ่งกลาง */
+            display: block;
+        }
+        .last-update {
+            text-align: center;
+            font-size: 0.9em;
+            color: #a0a0a0;
+            margin-top: 10px;
+        }
+        .empty-space {
+            background-color: red; /* พื้นที่ว่างสีแดงที่คุณระบุ */
+            height: 250px; /* ปรับขนาดให้เท่ากับกราฟ */
+            border-radius: 10px;
+        }
+        @media (max-width: 600px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+            canvas {
+                height: 200px !important;
+            }
+            .empty-space {
+                height: 200px;
+            }
+        }
     </style>
 </head>
 <body>
-    <h1>Real-time YOLO training metrics</h1>
-    <canvas id="boxLossChart"></canvas>
-    <canvas id="clsLossChart"></canvas>
-    <canvas id="prChart"></canvas>
-    <canvas id="mAPChart"></canvas>
+    <h1>YOLO Training Dashboard</h1>
+    <div class="dashboard">
+        <div class="chart-card"><canvas id="boxLossChart"></canvas></div>
+        <div class="chart-card"><canvas id="clsLossChart"></canvas></div>
+        <div class="chart-card"><canvas id="prChart"></canvas></div>
+        <div class="chart-card"><canvas id="mAPChart"></canvas></div>
+        <div class="chart-card"><canvas id="dflLossChart"></canvas></div> <!-- กราฟใหม่ในพื้นที่สีแดง -->
+    </div>
+    <div class="last-update">Last Updated: <span id="lastUpdateTime"></span></div>
 
     <script>
-        let boxLossChart, clsLossChart, prChart, mAPChart;
+        let boxLossChart, clsLossChart, prChart, mAPChart, dflLossChart;
+        let lastUpdateTime = document.getElementById('lastUpdateTime');
 
         async function fetchMetrics() {
             const response = await fetch('/metrics');
-            return await response.json();
+            const data = await response.json();
+            lastUpdateTime.textContent = new Date().toLocaleTimeString();
+            return data;
         }
 
         function updateCharts(metrics) {
             if (!boxLossChart) {
                 boxLossChart = new Chart(document.getElementById('boxLossChart'), {
                     type: 'line',
-                    data: { labels: metrics.epochs, datasets: [
-                        { label: 'Train Box Loss', data: metrics.train_box_loss, borderColor: '#ff6384', fill: false },
-                        { label: 'Val Box Loss', data: metrics.val_box_loss, borderColor: '#36a2eb', fill: false }
-                    ]},
-                    options: { plugins: { title: { display: true, text: 'Box Loss' } } }
+                    data: {
+                        labels: metrics.epochs,
+                        datasets: [
+                            { label: 'Train Box Loss', data: metrics.train_box_loss, borderColor: '#ff6384', fill: false },
+                            { label: 'Val Box Loss', data: metrics.val_box_loss, borderColor: '#36a2eb', fill: false }
+                        ]
+                    },
+                    options: {
+                        plugins: { title: { display: true, text: 'Box Loss', color: '#e0e0e0' } },
+                        scales: { y: { beginAtZero: true, ticks: { color: '#a0a0a0' } }, x: { ticks: { color: '#a0a0a0' } } },
+                        maintainAspectRatio: false
+                    }
                 });
             } else {
                 boxLossChart.data.labels = metrics.epochs;
@@ -45,11 +120,18 @@
             if (!clsLossChart) {
                 clsLossChart = new Chart(document.getElementById('clsLossChart'), {
                     type: 'line',
-                    data: { labels: metrics.epochs, datasets: [
-                        { label: 'Train Cls Loss', data: metrics.train_cls_loss, borderColor: '#ff6384', fill: false },
-                        { label: 'Val Cls Loss', data: metrics.val_cls_loss, borderColor: '#36a2eb', fill: false }
-                    ]},
-                    options: { plugins: { title: { display: true, text: 'Classification Loss' } } }
+                    data: {
+                        labels: metrics.epochs,
+                        datasets: [
+                            { label: 'Train Cls Loss', data: metrics.train_cls_loss, borderColor: '#ff6384', fill: false },
+                            { label: 'Val Cls Loss', data: metrics.val_cls_loss, borderColor: '#36a2eb', fill: false }
+                        ]
+                    },
+                    options: {
+                        plugins: { title: { display: true, text: 'Classification Loss', color: '#e0e0e0' } },
+                        scales: { y: { beginAtZero: true, ticks: { color: '#a0a0a0' } }, x: { ticks: { color: '#a0a0a0' } } },
+                        maintainAspectRatio: false
+                    }
                 });
             } else {
                 clsLossChart.data.labels = metrics.epochs;
@@ -61,11 +143,18 @@
             if (!prChart) {
                 prChart = new Chart(document.getElementById('prChart'), {
                     type: 'line',
-                    data: { labels: metrics.epochs, datasets: [
-                        { label: 'Precision', data: metrics.precision, borderColor: '#ff9f40', fill: false },
-                        { label: 'Recall', data: metrics.recall, borderColor: '#4bc0c0', fill: false }
-                    ]},
-                    options: { plugins: { title: { display: true, text: 'Precision & Recall' } } }
+                    data: {
+                        labels: metrics.epochs,
+                        datasets: [
+                            { label: 'Precision', data: metrics.precision, borderColor: '#ff9f40', fill: false },
+                            { label: 'Recall', data: metrics.recall, borderColor: '#4bc0c0', fill: false }
+                        ]
+                    },
+                    options: {
+                        plugins: { title: { display: true, text: 'Precision & Recall', color: '#e0e0e0' } },
+                        scales: { y: { beginAtZero: true, ticks: { color: '#a0a0a0' } }, x: { ticks: { color: '#a0a0a0' } } },
+                        maintainAspectRatio: false
+                    }
                 });
             } else {
                 prChart.data.labels = metrics.epochs;
@@ -77,17 +166,47 @@
             if (!mAPChart) {
                 mAPChart = new Chart(document.getElementById('mAPChart'), {
                     type: 'line',
-                    data: { labels: metrics.epochs, datasets: [
-                        { label: 'mAP@50', data: metrics.mAP50, borderColor: '#ffcd56', fill: false },
-                        { label: 'mAP@50:95', data: metrics.mAP50_95, borderColor: '#9966ff', fill: false }
-                    ]},
-                    options: { plugins: { title: { display: true, text: 'mAP Metrics' } } }
+                    data: {
+                        labels: metrics.epochs,
+                        datasets: [
+                            { label: 'mAP@50', data: metrics.mAP50, borderColor: '#ffcd56', fill: false },
+                            { label: 'mAP@50:95', data: metrics.mAP50_95, borderColor: '#9966ff', fill: false }
+                        ]
+                    },
+                    options: {
+                        plugins: { title: { display: true, text: 'mAP Metrics', color: '#e0e0e0' } },
+                        scales: { y: { beginAtZero: true, ticks: { color: '#a0a0a0' } }, x: { ticks: { color: '#a0a0a0' } } },
+                        maintainAspectRatio: false
+                    }
                 });
             } else {
                 mAPChart.data.labels = metrics.epochs;
                 mAPChart.data.datasets[0].data = metrics.mAP50;
                 mAPChart.data.datasets[1].data = metrics.mAP50_95;
                 mAPChart.update();
+            }
+
+            if (!dflLossChart) {
+                dflLossChart = new Chart(document.getElementById('dflLossChart'), {
+                    type: 'line',
+                    data: {
+                        labels: metrics.epochs,
+                        datasets: [
+                            { label: 'Train DFL Loss', data: metrics.train_dfl_loss || [], borderColor: '#ff33cc', fill: false },
+                            { label: 'Val DFL Loss', data: metrics.val_dfl_loss || [], borderColor: '#33ffcc', fill: false }
+                        ]
+                    },
+                    options: {
+                        plugins: { title: { display: true, text: 'DFL Loss', color: '#e0e0e0' } },
+                        scales: { y: { beginAtZero: true, ticks: { color: '#a0a0a0' } }, x: { ticks: { color: '#a0a0a0' } } },
+                        maintainAspectRatio: false
+                    }
+                });
+            } else {
+                dflLossChart.data.labels = metrics.epochs;
+                dflLossChart.data.datasets[0].data = metrics.train_dfl_loss || [];
+                dflLossChart.data.datasets[1].data = metrics.val_dfl_loss || [];
+                dflLossChart.update();
             }
         }
 
@@ -100,8 +219,7 @@
             }
         }
 
-        // รีเฟรชข้อมูลทุก 10 วินาที
-        setInterval(refreshData, 10000);
+        setInterval(refreshData, 5000); // อัปเดตทุก 5 วินาที
         refreshData(); // รันครั้งแรกทันที
     </script>
 </body>
