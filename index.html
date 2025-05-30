@@ -26,34 +26,27 @@
             flex-direction: column;
             gap: 20px;
         }
-        .main-chart {
+        .main-chart, .chart-card {
             width: 100%;
-            height: 100vh;
-            background-color: #FFFFFF;
-            padding: 15px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-        }
-        .sub-charts {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 20px;
-        }
-        .chart-card {
-            background-color: #2a2a3d;
+            height: 400px; /* ขนาดเท่ากันสำหรับทุกกราฟ */
+            background-color: #ffffff; /* พื้นหลังกราฟเป็นสีขาว */
             padding: 15px;
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
             transition: transform 0.2s;
         }
-        .chart-card:hover {
+        .main-chart:hover, .chart-card:hover {
             transform: scale(1.02);
+        }
+        .sub-charts {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
         }
         canvas {
             width: 100% !important;
-            height: 100% !important;
-            max-height: 300px;
-            background-color: #33334d;
+            height: 100% !important; /* กราฟเต็มกรอบ */
+            background-color: #ffffff; /* พื้นหลังกราฟเป็นสีขาว */
             border-radius: 5px;
             padding: 5px;
             margin: 0 auto;
@@ -66,11 +59,8 @@
             margin-top: 10px;
         }
         @media (max-width: 600px) {
-            .main-chart {
-                height: 50vh;
-            }
-            canvas {
-                max-height: 200px;
+            .main-chart, .chart-card {
+                height: 300px; /* ลดขนาดในมือถือ */
             }
             .sub-charts {
                 grid-template-columns: 1fr;
@@ -109,13 +99,16 @@
                     data: {
                         labels: metrics.epochs,
                         datasets: [
-                            { label: 'Train Box Loss', data: metrics.train_box_loss, borderColor: '#ff6384', fill: false, pointRadius: 2 },
-                            { label: 'Val Box Loss', data: metrics.val_box_loss, borderColor: '#36a2eb', fill: false, pointRadius: 2 }
+                            { label: 'Train Box Loss', data: metrics.train_box_loss, borderColor: '#ff6384', fill: false, pointRadius: 1 },
+                            { label: 'Val Box Loss', data: metrics.val_box_loss, borderColor: '#36a2eb', fill: false, pointRadius: 1 }
                         ]
                     },
                     options: {
-                        plugins: { title: { display: true, text: 'Box Loss', color: '#e0e0e0' } },
-                        scales: { y: { beginAtZero: true, ticks: { color: '#a0a0a0' } }, x: { ticks: { color: '#a0a0a0' } } },
+                        plugins: { title: { display: true, text: 'Box Loss', color: '#000000' } }, // ข้อความสีดำเข้ากับพื้นหลังขาว
+                        scales: {
+                            y: { beginAtZero: true, ticks: { color: '#000000' }, grid: { color: '#e0e0e0' } },
+                            x: { ticks: { color: '#000000' }, grid: { color: '#e0e0e0' } }
+                        },
                         maintainAspectRatio: false
                     }
                 });
@@ -132,13 +125,16 @@
                     data: {
                         labels: metrics.epochs,
                         datasets: [
-                            { label: 'Train Cls Loss', data: metrics.train_cls_loss, borderColor: '#ff6384', fill: false, pointRadius: 2 },
-                            { label: 'Val Cls Loss', data: metrics.val_cls_loss, borderColor: '#36a2eb', fill: false, pointRadius: 2 }
+                            { label: 'Train Cls Loss', data: metrics.train_cls_loss, borderColor: '#ff6384', fill: false, pointRadius: 1 },
+                            { label: 'Val Cls Loss', data: metrics.val_cls_loss, borderColor: '#36a2eb', fill: false, pointRadius: 1 }
                         ]
                     },
                     options: {
-                        plugins: { title: { display: true, text: 'Classification Loss', color: '#e0e0e0' } },
-                        scales: { y: { beginAtZero: true, ticks: { color: '#a0a0a0' } }, x: { ticks: { color: '#a0a0a0' } } },
+                        plugins: { title: { display: true, text: 'Classification Loss', color: '#000000' } },
+                        scales: {
+                            y: { beginAtZero: true, ticks: { color: '#000000' }, grid: { color: '#e0e0e0' } },
+                            x: { ticks: { color: '#000000' }, grid: { color: '#e0e0e0' } }
+                        },
                         maintainAspectRatio: false
                     }
                 });
@@ -155,13 +151,16 @@
                     data: {
                         labels: metrics.epochs,
                         datasets: [
-                            { label: 'Precision', data: metrics.precision, borderColor: '#ff9f40', fill: false, pointRadius: 2 },
-                            { label: 'Recall', data: metrics.recall, borderColor: '#4bc0c0', fill: false, pointRadius: 2 }
+                            { label: 'Precision', data: metrics.precision, borderColor: '#ff9f40', fill: false, pointRadius: 1 },
+                            { label: 'Recall', data: metrics.recall, borderColor: '#4bc0c0', fill: false, pointRadius: 1 }
                         ]
                     },
                     options: {
-                        plugins: { title: { display: true, text: 'Precision & Recall', color: '#e0e0e0' } },
-                        scales: { y: { beginAtZero: true, ticks: { color: '#a0a0a0' } }, x: { ticks: { color: '#a0a0a0' } } },
+                        plugins: { title: { display: true, text: 'Precision & Recall', color: '#000000' } },
+                        scales: {
+                            y: { beginAtZero: true, ticks: { color: '#000000' }, grid: { color: '#e0e0e0' } },
+                            x: { ticks: { color: '#000000' }, grid: { color: '#e0e0e0' } }
+                        },
                         maintainAspectRatio: false
                     }
                 });
@@ -178,13 +177,16 @@
                     data: {
                         labels: metrics.epochs,
                         datasets: [
-                            { label: 'mAP@50', data: metrics.mAP50, borderColor: '#ffcd56', fill: false, pointRadius: 2 },
-                            { label: 'mAP@50:95', data: metrics.mAP50_95, borderColor: '#9966ff', fill: false, pointRadius: 2 }
+                            { label: 'mAP@50', data: metrics.mAP50, borderColor: '#ffcd56', fill: false, pointRadius: 1 },
+                            { label: 'mAP@50:95', data: metrics.mAP50_95, borderColor: '#9966ff', fill: false, pointRadius: 1 }
                         ]
                     },
                     options: {
-                        plugins: { title: { display: true, text: 'mAP Metrics', color: '#e0e0e0' } },
-                        scales: { y: { beginAtZero: true, ticks: { color: '#a0a0a0' } }, x: { ticks: { color: '#a0a0a0' } } },
+                        plugins: { title: { display: true, text: 'mAP Metrics', color: '#000000' } },
+                        scales: {
+                            y: { beginAtZero: true, ticks: { color: '#000000' }, grid: { color: '#e0e0e0' } },
+                            x: { ticks: { color: '#000000' }, grid: { color: '#e0e0e0' } }
+                        },
                         maintainAspectRatio: false
                     }
                 });
@@ -201,13 +203,16 @@
                     data: {
                         labels: metrics.epochs,
                         datasets: [
-                            { label: 'Train DFL Loss', data: metrics.train_dfl_loss || [], borderColor: '#ff33cc', fill: false, pointRadius: 2 },
-                            { label: 'Val DFL Loss', data: metrics.val_dfl_loss || [], borderColor: '#33ffcc', fill: false, pointRadius: 2 }
+                            { label: 'Train DFL Loss', data: metrics.train_dfl_loss || [], borderColor: '#ff33cc', fill: false, pointRadius: 1 },
+                            { label: 'Val DFL Loss', data: metrics.val_dfl_loss || [], borderColor: '#33ffcc', fill: false, pointRadius: 1 }
                         ]
                     },
                     options: {
-                        plugins: { title: { display: true, text: 'DFL Loss', color: '#e0e0e0' } },
-                        scales: { y: { beginAtZero: true, ticks: { color: '#a0a0a0' } }, x: { ticks: { color: '#a0a0a0' } } },
+                        plugins: { title: { display: true, text: 'DFL Loss', color: '#000000' } },
+                        scales: {
+                            y: { beginAtZero: true, ticks: { color: '#000000' }, grid: { color: '#e0e0e0' } },
+                            x: { ticks: { color: '#000000' }, grid: { color: '#e0e0e0' } }
+                        },
                         maintainAspectRatio: false
                     }
                 });
