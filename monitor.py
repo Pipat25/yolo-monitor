@@ -23,6 +23,26 @@ def get_metrics():
     global latest_data
     try:
         latest_data = pd.read_csv(csv_path)
+        # คำนวณ Train Loss และ Val Loss รวม
+        train_loss = latest_data["train/box_loss"] + latest_data["train/cls_loss"]
+        val_loss = latest_data["val/box_loss"] + latest_data["val/cls_loss"]
+        # ใช้ค่า epoch ล่าสุด
+        latest_train_loss = train_loss.iloc[-1]
+        latest_val_loss = val_loss.iloc[-1]
+
+        # คำนวณเปอร์เซ็นต์ Overfitting
+        overfitting_pct = 0
+        if latest_val_loss > latest_train_loss:
+            overfitting_pct = ((latest_val_loss - latest_train_loss) / latest_train_loss) * 100 if latest_train_loss > 0 else 0
+
+        # คำนวณเปอร์เซ็นต์ Underfitting
+        underfitting_pct = 0
+        if latest_train_loss > 1.0:
+            underfitting_pct = ((latest_train_loss - 1.0) / latest_train_loss) * 100
+
+        # คำนวณเปอร์เซ็นต์ Fit ที่ดี
+        fit_pct = max(0, 100 - (overfitting_pct + underfitting_pct))
+
         response = jsonify({
             "epochs": latest_data["epoch"].tolist(),
             "train_box_loss": latest_data["train/box_loss"].tolist(),
@@ -35,9 +55,11 @@ def get_metrics():
             "mAP50_95": latest_data["metrics/mAP50-95(B)"].tolist(),
             "train_dfl_loss": latest_data.get("train/dfl_loss", pd.Series([])).tolist(),
             "val_dfl_loss": latest_data.get("val/dfl_loss", pd.Series([])).tolist(),
-            # เพิ่มข้อมูลสำหรับกราฟ overfitting/underfitting
-            "train_loss": (latest_data["train/box_loss"] + latest_data["train/cls_loss"]).tolist(),  # รวม Train Loss
-            "val_loss": (latest_data["val/box_loss"] + latest_data["val/cls_loss"]).tolist()         # รวม Val Loss
+            "train_loss": train_loss.tolist(),
+            "val_loss": val_loss.tolist(),
+            "overfitting_pct": overfitting_pct,
+            "underfitting_pct": underfitting_pct,
+            "fit_pct": fit_pct
         })
         response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
         return response
