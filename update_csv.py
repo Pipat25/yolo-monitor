@@ -2,7 +2,7 @@ import os
 import time
 import requests
 
-SOURCE_URL = " https://6f10-27-55-95-181.ngrok-free.app/results.csv"  # แทนด้วย URL จาก ngrok
+SOURCE_URL = "https://6f10-27-55-95-181.ngrok-free.app/results.csv"  # แทนด้วย URL จาก ngrok
 FILE_PATH = "results.csv"
 
 
