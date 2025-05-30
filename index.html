@@ -107,8 +107,8 @@
                     data: {
                         labels: metrics.epochs,
                         datasets: [
-                            { label: 'Train Box Loss', data: metrics.train_box_loss, borderColor: '#ff6384', fill: false, pointRadius: 1 },
-                            { label: 'Val Box Loss', data: metrics.val_box_loss, borderColor: '#36a2eb', fill: false, pointRadius: 1 }
+                            { label: 'Train Box Loss', data: metrics.train_box_loss, borderColor: '#ff6384', fill: false, pointRadius: 2 },
+                            { label: 'Val Box Loss', data: metrics.val_box_loss, borderColor: '#36a2eb', fill: false, pointRadius: 2 }
                         ]
                     },
                     options: {
@@ -133,8 +133,8 @@
                     data: {
                         labels: metrics.epochs,
                         datasets: [
-                            { label: 'Train Cls Loss', data: metrics.train_cls_loss, borderColor: '#ff6384', fill: false, pointRadius: 1 },
-                            { label: 'Val Cls Loss', data: metrics.val_cls_loss, borderColor: '#36a2eb', fill: false, pointRadius: 1 }
+                            { label: 'Train Cls Loss', data: metrics.train_cls_loss, borderColor: '#ff6384', fill: false, pointRadius: 2 },
+                            { label: 'Val Cls Loss', data: metrics.val_cls_loss, borderColor: '#36a2eb', fill: false, pointRadius: 2 }
                         ]
                     },
                     options: {
@@ -159,8 +159,8 @@
                     data: {
                         labels: metrics.epochs,
                         datasets: [
-                            { label: 'Precision', data: metrics.precision, borderColor: '#ff9f40', fill: false, pointRadius: 1 },
-                            { label: 'Recall', data: metrics.recall, borderColor: '#4bc0c0', fill: false, pointRadius: 1 }
+                            { label: 'Precision', data: metrics.precision, borderColor: '#ff9f40', fill: false, pointRadius: 2 },
+                            { label: 'Recall', data: metrics.recall, borderColor: '#4bc0c0', fill: false, pointRadius: 2 }
                         ]
                     },
                     options: {
@@ -185,8 +185,8 @@
                     data: {
                         labels: metrics.epochs,
                         datasets: [
-                            { label: 'mAP@50', data: metrics.mAP50, borderColor: '#ffcd56', fill: false, pointRadius: 1 },
-                            { label: 'mAP@50:95', data: metrics.mAP50_95, borderColor: '#9966ff', fill: false, pointRadius: 1 }
+                            { label: 'mAP@50', data: metrics.mAP50, borderColor: '#ffcd56', fill: false, pointRadius: 2 },
+                            { label: 'mAP@50:95', data: metrics.mAP50_95, borderColor: '#9966ff', fill: false, pointRadius: 2 }
                         ]
                     },
                     options: {
@@ -211,8 +211,8 @@
                     data: {
                         labels: metrics.epochs,
                         datasets: [
-                            { label: 'Train DFL Loss', data: metrics.train_dfl_loss || [], borderColor: '#ff33cc', fill: false, pointRadius: 1 },
-                            { label: 'Val DFL Loss', data: metrics.val_dfl_loss || [], borderColor: '#33ffcc', fill: false, pointRadius: 1 }
+                            { label: 'Train DFL Loss', data: metrics.train_dfl_loss || [], borderColor: '#ff33cc', fill: false, pointRadius: 2 },
+                            { label: 'Val DFL Loss', data: metrics.val_dfl_loss || [], borderColor: '#33ffcc', fill: false, pointRadius: 2 }
                         ]
                     },
                     options: {
