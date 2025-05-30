@@ -1,14 +1,27 @@
 import pandas as pd
 from flask import Flask, jsonify, send_file
 import os
+import threading
+import subprocess
+import time
 
 app = Flask(__name__)
 csv_path = "results.csv"
+latest_data = None
+
+def update_csv_periodically():
+    while True:
+        try:
+            subprocess.run(["python", "update_csv.py"])
+            print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] อัปเดต results.csv สำเร็จ")
+            time.sleep(10)  # อัปเดตทุก 10 วินาที
+        except Exception as e:
+            print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] เกิดข้อผิดพลาด: {e}")
 
 @app.route('/metrics')
 def get_metrics():
+    global latest_data
     try:
-        # อ่านไฟล์ทุกครั้งที่มี request
         latest_data = pd.read_csv(csv_path)
         response = jsonify({
             "epochs": latest_data["epoch"].tolist(),
@@ -33,4 +46,6 @@ def serve_html():
 if __name__ == '__main__':
     if not os.path.exists(csv_path):
         print(f"⚠️ ไม่พบไฟล์ CSV ที่ {csv_path}")
-    app.run(host='0.0.0.0', port=10000, debug=True)  # ใช้พอร์ต 10000 สำหรับ Render
+    # เริ่ม thread เพื่ออัปเดตทุก 10 วินาที
+    threading.Thread(target=update_csv_periodically, daemon=True).start()
+    app.run(host='0.0.0.0', port=10000, debug=True)
