@@ -22,6 +22,19 @@
         .dashboard {
             max-width: 1200px;
             margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .main-chart {
+            width: 100%;
+            height: 70vh;
+            background-color: #2a2a3d;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        .sub-charts {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
             gap: 20px;
@@ -38,13 +51,12 @@
         }
         canvas {
             width: 100% !important;
-            max-width: 500px; /* จำกัดความกว้างสูงสุด */
-            height: 250px !important; /* ลดความสูงเพื่อให้สมส่วน */
-            max-height: 300px; /* จำกัดความสูงสูงสุด */
+            height: 100% !important;
+            max-height: 300px;
             background-color: #33334d;
             border-radius: 5px;
             padding: 5px;
-            margin: 0 auto; /* จัดกึ่งกลาง */
+            margin: 0 auto;
             display: block;
         }
         .last-update {
@@ -53,20 +65,15 @@
             color: #a0a0a0;
             margin-top: 10px;
         }
-        .empty-space {
-            background-color: red; /* พื้นที่ว่างสีแดงที่คุณระบุ */
-            height: 250px; /* ปรับขนาดให้เท่ากับกราฟ */
-            border-radius: 10px;
-        }
         @media (max-width: 600px) {
-            .dashboard {
-                grid-template-columns: 1fr;
+            .main-chart {
+                height: 50vh;
             }
             canvas {
-                height: 200px !important;
+                max-height: 200px;
             }
-            .empty-space {
-                height: 200px;
+            .sub-charts {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -74,11 +81,13 @@
 <body>
     <h1>YOLO Training Dashboard</h1>
     <div class="dashboard">
-        <div class="chart-card"><canvas id="boxLossChart"></canvas></div>
-        <div class="chart-card"><canvas id="clsLossChart"></canvas></div>
-        <div class="chart-card"><canvas id="prChart"></canvas></div>
-        <div class="chart-card"><canvas id="mAPChart"></canvas></div>
-        <div class="chart-card"><canvas id="dflLossChart"></canvas></div> <!-- กราฟใหม่ในพื้นที่สีแดง -->
+        <div class="main-chart"><canvas id="boxLossChart"></canvas></div>
+        <div class="sub-charts">
+            <div class="chart-card"><canvas id="clsLossChart"></canvas></div>
+            <div class="chart-card"><canvas id="prChart"></canvas></div>
+            <div class="chart-card"><canvas id="mAPChart"></canvas></div>
+            <div class="chart-card"><canvas id="dflLossChart"></canvas></div>
+        </div>
     </div>
     <div class="last-update">Last Updated: <span id="lastUpdateTime"></span></div>
 
@@ -100,8 +109,8 @@
                     data: {
                         labels: metrics.epochs,
                         datasets: [
-                            { label: 'Train Box Loss', data: metrics.train_box_loss, borderColor: '#ff6384', fill: false },
-                            { label: 'Val Box Loss', data: metrics.val_box_loss, borderColor: '#36a2eb', fill: false }
+                            { label: 'Train Box Loss', data: metrics.train_box_loss, borderColor: '#ff6384', fill: false, pointRadius: 1 },
+                            { label: 'Val Box Loss', data: metrics.val_box_loss, borderColor: '#36a2eb', fill: false, pointRadius: 1 }
                         ]
                     },
                     options: {
@@ -123,8 +132,8 @@
                     data: {
                         labels: metrics.epochs,
                         datasets: [
-                            { label: 'Train Cls Loss', data: metrics.train_cls_loss, borderColor: '#ff6384', fill: false },
-                            { label: 'Val Cls Loss', data: metrics.val_cls_loss, borderColor: '#36a2eb', fill: false }
+                            { label: 'Train Cls Loss', data: metrics.train_cls_loss, borderColor: '#ff6384', fill: false, pointRadius: 1 },
+                            { label: 'Val Cls Loss', data: metrics.val_cls_loss, borderColor: '#36a2eb', fill: false, pointRadius: 1 }
                         ]
                     },
                     options: {
@@ -146,8 +155,8 @@
                     data: {
                         labels: metrics.epochs,
                         datasets: [
-                            { label: 'Precision', data: metrics.precision, borderColor: '#ff9f40', fill: false },
-                            { label: 'Recall', data: metrics.recall, borderColor: '#4bc0c0', fill: false }
+                            { label: 'Precision', data: metrics.precision, borderColor: '#ff9f40', fill: false, pointRadius: 1 },
+                            { label: 'Recall', data: metrics.recall, borderColor: '#4bc0c0', fill: false, pointRadius: 1 }
                         ]
                     },
                     options: {
@@ -169,8 +178,8 @@
                     data: {
                         labels: metrics.epochs,
                         datasets: [
-                            { label: 'mAP@50', data: metrics.mAP50, borderColor: '#ffcd56', fill: false },
-                            { label: 'mAP@50:95', data: metrics.mAP50_95, borderColor: '#9966ff', fill: false }
+                            { label: 'mAP@50', data: metrics.mAP50, borderColor: '#ffcd56', fill: false, pointRadius: 1 },
+                            { label: 'mAP@50:95', data: metrics.mAP50_95, borderColor: '#9966ff', fill: false, pointRadius: 1 }
                         ]
                     },
                     options: {
@@ -192,8 +201,8 @@
                     data: {
                         labels: metrics.epochs,
                         datasets: [
-                            { label: 'Train DFL Loss', data: metrics.train_dfl_loss || [], borderColor: '#ff33cc', fill: false },
-                            { label: 'Val DFL Loss', data: metrics.val_dfl_loss || [], borderColor: '#33ffcc', fill: false }
+                            { label: 'Train DFL Loss', data: metrics.train_dfl_loss || [], borderColor: '#ff33cc', fill: false, pointRadius: 1 },
+                            { label: 'Val DFL Loss', data: metrics.val_dfl_loss || [], borderColor: '#33ffcc', fill: false, pointRadius: 1 }
                         ]
                     },
                     options: {
@@ -219,8 +228,8 @@
             }
         }
 
-        setInterval(refreshData, 5000); // อัปเดตทุก 5 วินาที
-        refreshData(); // รันครั้งแรกทันที
+        setInterval(refreshData, 5000);
+        refreshData();
     </script>
 </body>
 </html>
