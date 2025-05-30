@@ -26,10 +26,23 @@
             flex-direction: column;
             gap: 20px;
         }
-        .main-chart, .chart-card {
+        .main-chart {
             width: 100%;
-            height: 400px; /* ขนาดเท่ากันสำหรับทุกกราฟ */
-            background-color: #ffffff; /* พื้นหลังกราฟเป็นสีขาว */
+            height: 600px; /* กราฟแรกใหญ่และยาวเต็มหน้า */
+            background-color: #ffffff;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        .sub-charts {
+            display: flex;
+            flex-direction: column; /* จัดกราฟย่อยแนวตั้ง */
+            gap: 20px;
+        }
+        .chart-card {
+            width: 100%;
+            height: 400px; /* กราฟย่อยขนาดเล็กลง */
+            background-color: #ffffff;
             padding: 15px;
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
@@ -38,15 +51,10 @@
         .main-chart:hover, .chart-card:hover {
             transform: scale(1.02);
         }
-        .sub-charts {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-            gap: 20px;
-        }
         canvas {
             width: 100% !important;
-            height: 100% !important; /* กราฟเต็มกรอบ */
-            background-color: #ffffff; /* พื้นหลังกราฟเป็นสีขาว */
+            height: 100% !important;
+            background-color: #ffffff;
             border-radius: 5px;
             padding: 5px;
             margin: 0 auto;
@@ -59,11 +67,11 @@
             margin-top: 10px;
         }
         @media (max-width: 600px) {
-            .main-chart, .chart-card {
-                height: 300px; /* ลดขนาดในมือถือ */
+            .main-chart {
+                height: 400px; /* ลดขนาดในมือถือ */
             }
-            .sub-charts {
-                grid-template-columns: 1fr;
+            .chart-card {
+                height: 300px;
             }
         }
     </style>
@@ -104,7 +112,7 @@
                         ]
                     },
                     options: {
-                        plugins: { title: { display: true, text: 'Box Loss', color: '#000000' } }, // ข้อความสีดำเข้ากับพื้นหลังขาว
+                        plugins: { title: { display: true, text: 'Box Loss', color: '#000000' } },
                         scales: {
                             y: { beginAtZero: true, ticks: { color: '#000000' }, grid: { color: '#e0e0e0' } },
                             x: { ticks: { color: '#000000' }, grid: { color: '#e0e0e0' } }
