@@ -1,4 +1,3 @@
 ﻿flask
 pandas
-watchdog
 requests  # สำหรับดึงไฟล์
