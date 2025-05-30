@@ -1,281 +1,108 @@
-﻿<!DOCTYPE html>
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-    <title>เมตริกการฝึก YOLO</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YOLO Training Metrics</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body {
-            background-color: #2c2f33; /* สีเทามืดสำหรับพื้นหลังทั้งหน้า */
-            color: #ffffff;
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        h2 {
-            color: #00ffcc; /* สีเขียวฟ้าสดใส */
-            margin-bottom: 20px;
-        }
-
-        .chart-container {
-            width: 800px; /* ความกว้าง */
-            height: 200px; /* ความสูง */
-            margin: 10px;
-            border: 2px solid #cccccc; /* ตีกรอบด้วยสีเทาอ่อน */
-            border-radius: 5px; /* มุมโค้งเล็กน้อย */
-            overflow: hidden; /* ป้องกันกราฟล้นกรอบ */
-        }
-
-        .chart-inner {
-            width: 100%;
-            height: 100%;
-            background-color: #ffffff; /* สีขาวภายในกรอบกราฟ */
-            padding: 2px; /* ระยะห่างภายในกรอบ */
-        }
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        canvas { max-width: 600px; margin: 20px 0; }
     </style>
 </head>
 <body>
-    <h2>เมตริกการฝึก YOLO แบบเรียลไทม์</h2>
-    <div class="chart-container">
-        <div class="chart-inner">
-            <canvas id="boxLossChart"></canvas>
-        </div>
-    </div>
-    <div class="chart-container">
-        <div class="chart-inner">
-            <canvas id="clsLossChart"></canvas>
-        </div>
-    </div>
-    <div class="chart-container">
-        <div class="chart-inner">
-            <canvas id="precisionRecallChart"></canvas>
-        </div>
-    </div>
-    <div class="chart-container">
-        <div class="chart-inner">
-            <canvas id="mAPChart"></canvas>
-        </div>
-    </div>
+    <h1>ผลการฝึก YOLO อัปเดตแบบเรียลไทม์</h1>
+    <canvas id="boxLossChart"></canvas>
+    <canvas id="clsLossChart"></canvas>
+    <canvas id="prChart"></canvas>
+    <canvas id="mAPChart"></canvas>
 
     <script>
-        // กราฟ Box Loss
-        const boxLossChart = new Chart(document.getElementById('boxLossChart').getContext('2d'), {
-            type: 'line',
-            data: {
-                labels: [],
-                datasets: [
-                    {
-                        label: 'Train Box Loss',
-                        data: [],
-                        borderColor: '#00ffcc', /* สีเขียวฟ้า */
-                        backgroundColor: 'rgba(0, 255, 204, 0.2)',
-                        fill: true,
-                        tension: 0.1,
-                        pointRadius: 5, // ขนาดของจุด
-                        pointStyle: 'circle', // รูปแบบจุด (วงกลม)
-                        pointBackgroundColor: '#00ffcc' // สีของจุด (ตรงกับสีเส้น)
-                    },
-                    {
-                        label: 'Val Box Loss',
-                        data: [],
-                        borderColor: '#ffcc00', /* สีเหลือง */
-                        backgroundColor: 'rgba(255, 204, 0, 0.2)',
-                        fill: true,
-                        tension: 0.1,
-                        pointRadius: 5,
-                        pointStyle: 'circle',
-                        pointBackgroundColor: '#ffcc00'
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    title: { display: true, text: 'ค่าความสูญเสียของกล่อง', color: '#00ffcc' },
-                    legend: { labels: { color: '#000000' } }
-                },
-                scales: {
-                    x: { title: { display: true, text: 'Epoch', color: '#000000' }, ticks: { color: '#000000' } },
-                    y: { title: { display: true, text: 'Box Loss', color: '#000000' }, ticks: { color: '#000000' }, beginAtZero: true }
-                }
-            }
-        });
+        let boxLossChart, clsLossChart, prChart, mAPChart;
 
-        // กราฟ Classification Loss
-        const clsLossChart = new Chart(document.getElementById('clsLossChart').getContext('2d'), {
-            type: 'line',
-            data: {
-                labels: [],
-                datasets: [
-                    {
-                        label: 'Train Classification Loss',
-                        data: [],
-                        borderColor: '#ff6666', /* สีแดงอ่อน */
-                        backgroundColor: 'rgba(255, 102, 102, 0.2)',
-                        fill: true,
-                        tension: 0.1,
-                        pointRadius: 5,
-                        pointStyle: 'circle',
-                        pointBackgroundColor: '#ff6666'
-                    },
-                    {
-                        label: 'Val Classification Loss',
-                        data: [],
-                        borderColor: '#ff9999', /* สีแดงจาง */
-                        backgroundColor: 'rgba(255, 153, 153, 0.2)',
-                        fill: true,
-                        tension: 0.1,
-                        pointRadius: 5,
-                        pointStyle: 'circle',
-                        pointBackgroundColor: '#ff9999'
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    title: { display: true, text: 'ค่าความสูญเสียของการจำแนกประเภท', color: '#ff6666' },
-                    legend: { labels: { color: '#000000' } }
-                },
-                scales: {
-                    x: { title: { display: true, text: 'Epoch', color: '#000000' }, ticks: { color: '#000000' } },
-                    y: { title: { display: true, text: 'Classification Loss', color: '#000000' }, ticks: { color: '#000000' }, beginAtZero: true }
-                }
-            }
-        });
-
-        // กราฟ Precision and Recall
-        const precisionRecallChart = new Chart(document.getElementById('precisionRecallChart').getContext('2d'), {
-            type: 'line',
-            data: {
-                labels: [],
-                datasets: [
-                    {
-                        label: 'ความแม่นยำ (Precision)',
-                        data: [],
-                        borderColor: '#66ccff', /* สีฟ้าอ่อน */
-                        backgroundColor: 'rgba(102, 204, 255, 0.2)',
-                        fill: true,
-                        tension: 0.1,
-                        pointRadius: 5,
-                        pointStyle: 'circle',
-                        pointBackgroundColor: '#66ccff'
-                    },
-                    {
-                        label: 'การเรียกคืน (Recall)',
-                        data: [],
-                        borderColor: '#ff99cc', /* สีชมพู */
-                        backgroundColor: 'rgba(255, 153, 204, 0.2)',
-                        fill: true,
-                        tension: 0.1,
-                        pointRadius: 5,
-                        pointStyle: 'circle',
-                        pointBackgroundColor: '#ff99cc'
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    title: { display: true, text: 'ความแม่นยำและการเรียกคืน', color: '#66ccff' },
-                    legend: { labels: { color: '#000000' } }
-                },
-                scales: {
-                    x: { title: { display: true, text: 'Epoch', color: '#000000' }, ticks: { color: '#000000' } },
-                    y: { title: { display: true, text: 'ค่า', color: '#000000' }, ticks: { color: '#000000' }, min: 0, max: 1 }
-                }
-            }
-        });
-
-        // กราฟ mAP
-        const mAPChart = new Chart(document.getElementById('mAPChart').getContext('2d'), {
-            type: 'line',
-            data: {
-                labels: [],
-                datasets: [
-                    {
-                        label: 'mAP@0.5',
-                        data: [],
-                        borderColor: '#cc99ff', /* สีม่วงอ่อน */
-                        backgroundColor: 'rgba(204, 153, 255, 0.2)',
-                        fill: true,
-                        tension: 0.1,
-                        pointRadius: 5,
-                        pointStyle: 'circle',
-                        pointBackgroundColor: '#cc99ff'
-                    },
-                    {
-                        label: 'mAP@0.5:0.95',
-                        data: [],
-                        borderColor: '#ffcc99', /* สีส้มอ่อน */
-                        backgroundColor: 'rgba(255, 204, 153, 0.2)',
-                        fill: true,
-                        tension: 0.1,
-                        pointRadius: 5,
-                        pointStyle: 'circle',
-                        pointBackgroundColor: '#ffcc99'
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    title: { display: true, text: 'mAP@0.5 และ mAP@0.5:0.95', color: '#cc99ff' },
-                    legend: { labels: { color: '#000000' } }
-                },
-                scales: {
-                    x: { title: { display: true, text: 'Epoch', color: '#000000' }, ticks: { color: '#000000' } },
-                    y: { title: { display: true, text: 'mAP', color: '#000000' }, ticks: { color: '#000000' }, min: 0, max: 1 }
-                }
-            }
-        });
-
-        // อัปเดตกราฟ
-        function updateCharts() {
-            fetch('/metrics')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.error) {
-                        console.log(data.error);
-                        return;
-                    }
-
-                    // อัปเดตกราฟ Box Loss
-                    boxLossChart.data.labels = data.epochs;
-                    boxLossChart.data.datasets[0].data = data.train_box_loss;
-                    boxLossChart.data.datasets[1].data = data.val_box_loss;
-                    boxLossChart.update();
-
-                    // อัปเดตกราฟ Classification Loss
-                    clsLossChart.data.labels = data.epochs;
-                    clsLossChart.data.datasets[0].data = data.train_cls_loss;
-                    clsLossChart.data.datasets[1].data = data.val_cls_loss;
-                    clsLossChart.update();
-
-                    // อัปเดตกราฟ Precision and Recall
-                    precisionRecallChart.data.labels = data.epochs;
-                    precisionRecallChart.data.datasets[0].data = data.precision;
-                    precisionRecallChart.data.datasets[1].data = data.recall;
-                    precisionRecallChart.update();
-
-                    // อัปเดตกราฟ mAP
-                    mAPChart.data.labels = data.epochs;
-                    mAPChart.data.datasets[0].data = data.mAP50;
-                    mAPChart.data.datasets[1].data = data.mAP50_95;
-                    mAPChart.update();
-                })
-                .catch(error => console.error('เกิดข้อผิดพลาดในการดึงข้อมูล:', error));
+        async function fetchMetrics() {
+            const response = await fetch('/metrics');
+            return await response.json();
         }
 
-        // อัปเดตทุก 5 วินาที
-        setInterval(updateCharts, 5000);
-        updateCharts(); // เรียกครั้งแรก
+        function updateCharts(metrics) {
+            if (!boxLossChart) {
+                boxLossChart = new Chart(document.getElementById('boxLossChart'), {
+                    type: 'line',
+                    data: { labels: metrics.epochs, datasets: [
+                        { label: 'Train Box Loss', data: metrics.train_box_loss, borderColor: '#ff6384', fill: false },
+                        { label: 'Val Box Loss', data: metrics.val_box_loss, borderColor: '#36a2eb', fill: false }
+                    ]},
+                    options: { plugins: { title: { display: true, text: 'Box Loss' } } }
+                });
+            } else {
+                boxLossChart.data.labels = metrics.epochs;
+                boxLossChart.data.datasets[0].data = metrics.train_box_loss;
+                boxLossChart.data.datasets[1].data = metrics.val_box_loss;
+                boxLossChart.update();
+            }
+
+            if (!clsLossChart) {
+                clsLossChart = new Chart(document.getElementById('clsLossChart'), {
+                    type: 'line',
+                    data: { labels: metrics.epochs, datasets: [
+                        { label: 'Train Cls Loss', data: metrics.train_cls_loss, borderColor: '#ff6384', fill: false },
+                        { label: 'Val Cls Loss', data: metrics.val_cls_loss, borderColor: '#36a2eb', fill: false }
+                    ]},
+                    options: { plugins: { title: { display: true, text: 'Classification Loss' } } }
+                });
+            } else {
+                clsLossChart.data.labels = metrics.epochs;
+                clsLossChart.data.datasets[0].data = metrics.train_cls_loss;
+                clsLossChart.data.datasets[1].data = metrics.val_cls_loss;
+                clsLossChart.update();
+            }
+
+            if (!prChart) {
+                prChart = new Chart(document.getElementById('prChart'), {
+                    type: 'line',
+                    data: { labels: metrics.epochs, datasets: [
+                        { label: 'Precision', data: metrics.precision, borderColor: '#ff9f40', fill: false },
+                        { label: 'Recall', data: metrics.recall, borderColor: '#4bc0c0', fill: false }
+                    ]},
+                    options: { plugins: { title: { display: true, text: 'Precision & Recall' } } }
+                });
+            } else {
+                prChart.data.labels = metrics.epochs;
+                prChart.data.datasets[0].data = metrics.precision;
+                prChart.data.datasets[1].data = metrics.recall;
+                prChart.update();
+            }
+
+            if (!mAPChart) {
+                mAPChart = new Chart(document.getElementById('mAPChart'), {
+                    type: 'line',
+                    data: { labels: metrics.epochs, datasets: [
+                        { label: 'mAP@50', data: metrics.mAP50, borderColor: '#ffcd56', fill: false },
+                        { label: 'mAP@50:95', data: metrics.mAP50_95, borderColor: '#9966ff', fill: false }
+                    ]},
+                    options: { plugins: { title: { display: true, text: 'mAP Metrics' } } }
+                });
+            } else {
+                mAPChart.data.labels = metrics.epochs;
+                mAPChart.data.datasets[0].data = metrics.mAP50;
+                mAPChart.data.datasets[1].data = metrics.mAP50_95;
+                mAPChart.update();
+            }
+        }
+
+        async function refreshData() {
+            try {
+                const metrics = await fetchMetrics();
+                updateCharts(metrics);
+            } catch (error) {
+                console.error('Error fetching metrics:', error);
+            }
+        }
+
+        // รีเฟรชข้อมูลทุก 10 วินาที
+        setInterval(refreshData, 10000);
+        refreshData(); // รันครั้งแรกทันที
     </script>
 </body>
 </html>
