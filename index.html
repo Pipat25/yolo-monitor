@@ -85,13 +85,14 @@
             <div class="chart-card"><canvas id="prChart"></canvas></div>
             <div class="chart-card"><canvas id="mAPChart"></canvas></div>
             <div class="chart-card"><canvas id="dflLossChart"></canvas></div>
-            <div class="chart-card"><canvas id="fitChart"></canvas></div> <!-- เพิ่มกราฟ Overfitting/Underfitting -->
+            <div class="chart-card"><canvas id="fitChart"></canvas></div>
+            <div class="chart-card"><canvas id="fitPercentChart"></canvas></div> <!-- เพิ่มกราฟเปอร์เซ็นต์ -->
         </div>
     </div>
     <div class="last-update">Last Updated: <span id="lastUpdateTime"></span></div>
 
     <script>
-        let boxLossChart, clsLossChart, prChart, mAPChart, dflLossChart, fitChart; // เพิ่มตัวแปรสำหรับกราฟใหม่
+        let boxLossChart, clsLossChart, prChart, mAPChart, dflLossChart, fitChart, fitPercentChart;
         let lastUpdateTime = document.getElementById('lastUpdateTime');
 
         async function fetchMetrics() {
@@ -232,7 +233,6 @@
                 dflLossChart.update();
             }
 
-            // เพิ่มกราฟ Overfitting/Underfitting
             if (!fitChart) {
                 fitChart = new Chart(document.getElementById('fitChart'), {
                     type: 'line',
@@ -257,6 +257,34 @@
                 fitChart.data.datasets[0].data = metrics.train_loss;
                 fitChart.data.datasets[1].data = metrics.val_loss;
                 fitChart.update();
+            }
+
+            // เพิ่มกราฟเปอร์เซ็นต์ Overfitting/Underfitting/Fit
+            if (!fitPercentChart) {
+                fitPercentChart = new Chart(document.getElementById('fitPercentChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: ['Overfitting', 'Underfitting', 'Good Fit'],
+                        datasets: [{
+                            label: 'Percentage (%)',
+                            data: [metrics.overfitting_pct, metrics.underfitting_pct, metrics.fit_pct],
+                            backgroundColor: ['#ff6384', '#ff9f40', '#4bc0c0'],
+                            borderColor: ['#ff6384', '#ff9f40', '#4bc0c0'],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        plugins: { title: { display: true, text: 'Overfitting/Underfitting Percentage', color: '#000000' } },
+                        scales: {
+                            y: { beginAtZero: true, max: 100, ticks: { color: '#000000' }, grid: { color: '#e0e0e0' } },
+                            x: { ticks: { color: '#000000' }, grid: { color: '#e0e0e0' } }
+                        },
+                        maintainAspectRatio: false
+                    }
+                });
+            } else {
+                fitPercentChart.data.datasets[0].data = [metrics.overfitting_pct, metrics.underfitting_pct, metrics.fit_pct];
+                fitPercentChart.update();
             }
         }
 
